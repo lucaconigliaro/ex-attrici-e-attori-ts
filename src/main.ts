@@ -35,7 +35,7 @@ function isActress(data: unknown): data is Actress {
     "id" in data && typeof data.id === "number" &&
     "name" in data && typeof data.name === "string" &&
     "birth_year" in data && typeof data.birth_year === "number" &&
-    (!("death_year" in data) || typeof data.death_year === "number") && // death_year è opzionale → controllo solo se esiste prima di controllare il tipo
+    (!("death_year" in data) || typeof data.death_year === "number") && // death_year è opzionale → controllo se esiste prima di controllare il tipo
     "biography" in data && typeof data.biography === "string" &&
     "image" in data && typeof data.image === "string" &&
     "most_famous_movies" in data &&
@@ -44,7 +44,7 @@ function isActress(data: unknown): data is Actress {
     data.most_famous_movies.every(m => typeof m === "string") &&
     "awards" in data && typeof data.awards === "string" &&
     "nationality" in data && typeof data.nationality === "string"
-  ) 
+  )
 };
 
 async function getActress(id: number): Promise<Actress | null> {
@@ -69,13 +69,27 @@ async function getActress(id: number): Promise<Actress | null> {
 };
 
 // 📌 Milestone 4
-// Crea una funzione getAllActresses che chiama:
-
-// GET https://boolean-spec-frontend.vercel.app/freetestapi/actresses
-// La funzione deve restituire un array di oggetti Actress.
-
-// Può essere anche un array vuoto.
-
+async function getAllActresses(): Promise<Actress[]> {
+  try {
+    const response = await fetch("https://boolean-spec-frontend.vercel.app/freetestapi/actresses");
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status}`);
+    }
+    const data: unknown = await response.json();
+    if (!(data instanceof Array)) {
+      throw new Error("Data is not valid");
+    }
+    const validActresses: Actress[] = data.filter(isActress);
+    return validActresses;
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+    } else {
+      console.error("Unknow error", error);
+    }
+    return [];
+  }
+};
 
 // 📌 Milestone 5
 // Crea una funzione getActresses che riceve un array di numeri (gli id delle attrici).
